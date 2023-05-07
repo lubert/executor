@@ -5,6 +5,7 @@
 #include <MPW.h>
 
 #include <prefs/prefs.h>
+#include <rsys/unixio.h>
 
 #include <QuickDraw.h>
 #include <WindowMgr.h>
@@ -12,9 +13,6 @@
 #include <MenuMgr.h>
 #include <DialogMgr.h>
 #include <MemoryMgr.h>
-
-#include <unistd.h>
-#include <fcntl.h>
 
 #include <memory>
 
