@@ -15,11 +15,11 @@ pkgs.libsForQt5.callPackage(
             boost
             readline
             SDL2
-        ] ++ lib.optionals stdenv.isLinux (
+        ] ++ lib.optionals stdenv.isLinux [
             SDL
             wayland
             waylandpp
-        ) ++ lib.optionals stdenv.isDarwin (with darwin.apple_sdk.frameworks; [
+        ] ++ lib.optionals stdenv.isDarwin (with darwin.apple_sdk.frameworks; [
             Carbon
             Cocoa
         ]);
