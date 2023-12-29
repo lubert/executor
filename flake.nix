@@ -2,7 +2,7 @@
   description = "Executor 2000 - classic mac emulator";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
   };
 
   outputs = inputs@{ flake-parts, ... }:
@@ -12,7 +12,7 @@
         packages.default = pkgs.stdenv.mkDerivation
           {
             name = "executor2000";
-            nativeBuildInputs = with pkgs; [ cmake bison perl ruby pkgconfig qt5.wrapQtAppsHook ];
+            nativeBuildInputs = with pkgs; [ cmake bison perl ruby pkg-config qt5.wrapQtAppsHook ];
             buildInputs = with pkgs; [
               qt5.qtbase
               boost
