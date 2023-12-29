@@ -1,3 +1,5 @@
+set(FRONT_ENDS qt x sdl sdl2 wayland CACHE STRING "frontends to build")
+
 find_program(PERL_COMMAND perl)
 if(NOT PERL_COMMAND)
     message(FATAL_ERROR "Cannot find command: 'perl' (needed for building!)")
@@ -83,8 +85,6 @@ else()
     set(host_os_libs)
 endif()
 source_group(HostOS FILES ${host_os_sources})
-
-set(FRONT_ENDS qt x sdl sdl2 wayland)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     # -Wno-enum-compare: Mac OSErr codes are currently spread between different
@@ -602,37 +602,46 @@ else()
     set(platform_resource_files)
 endif()
 
+set(BUILT_FRONT_ENDS)
 foreach(FRONT_END ${FRONT_ENDS})
-    if(TARGET front-end-${FRONT_END})
-        add_executable(executor-${FRONT_END} main.cpp ${platform_resource_files})
-        target_link_libraries(executor-${FRONT_END} romlib front-end-headless Boost::program_options)
-        if(NOT ${FRONT_END} STREQUAL headless)
-            target_link_libraries(executor-${FRONT_END} romlib front-end-${FRONT_END})
-        endif()
-        set_target_properties(executor-${FRONT_END} PROPERTIES
-            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-
-
-        if(APPLE AND NOT ${FRONT_END} STREQUAL headless)
-            set_target_properties(executor-${FRONT_END} PROPERTIES
-                    MACOSX_BUNDLE TRUE
-                    MACOSX_BUNDLE_IDENTIFIER com.github.autc04.executor
-                    MACOSX_BUNDLE_ICON_FILE executor.icns
-                    MACOSX_BUNDLE_BUNDLE_NAME "Executor 2000"
-                )
-        endif()
-        
-        install(TARGETS executor-${FRONT_END}
-            RUNTIME DESTINATION bin
-            BUNDLE DESTINATION .)
-
+    if(TARGET front-end-${FRONT_END} OR ${FRONT_END} STREQUAL headless)
+        list(APPEND BUILT_FRONT_ENDS ${FRONT_END})
     endif()
 endforeach()
 
-if(TARGET executor-qt)
-    if(APPLE)
-        set_target_properties(executor-qt PROPERTIES OUTPUT_NAME "Executor 2000")
+foreach(FRONT_END ${BUILT_FRONT_ENDS})
+    add_executable(executor-${FRONT_END} main.cpp ${platform_resource_files})
+    target_link_libraries(executor-${FRONT_END} romlib front-end-headless Boost::program_options)
+    if(${FRONT_END} STREQUAL headless)
+        target_compile_definitions(executor-${FRONT_END} PUBLIC -DHEADLESS_ONLY)
     else()
-        set_target_properties(executor-qt PROPERTIES OUTPUT_NAME executor)
+        target_link_libraries(executor-${FRONT_END} romlib front-end-${FRONT_END})
     endif()
+    set_target_properties(executor-${FRONT_END} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+
+    if(APPLE AND NOT ${FRONT_END} STREQUAL headless)
+        set_target_properties(executor-${FRONT_END} PROPERTIES
+                MACOSX_BUNDLE TRUE
+                MACOSX_BUNDLE_IDENTIFIER com.github.autc04.executor
+                MACOSX_BUNDLE_ICON_FILE executor.icns
+                MACOSX_BUNDLE_BUNDLE_NAME "Executor 2000"
+            )
+    endif()
+    
+    install(TARGETS executor-${FRONT_END}
+        RUNTIME DESTINATION bin
+        BUNDLE DESTINATION .)
+
+endforeach()
+
+message("All Front Ends: ${FRONT_ENDS}")
+message("Built Front Ends: ${BUILT_FRONT_ENDS}")
+list(GET BUILT_FRONT_ENDS 0 DEFAULT_FRONT_END)
+message("Default Front End: ${DEFAULT_FRONT_END}")
+if(APPLE AND NOT ${DEFAULT_FRONT_END} STREQUAL headless)
+    set_target_properties(executor-${DEFAULT_FRONT_END} PROPERTIES OUTPUT_NAME "Executor 2000")
+else()
+    set_target_properties(executor-${DEFAULT_FRONT_END} PROPERTIES OUTPUT_NAME executor)
 endif()

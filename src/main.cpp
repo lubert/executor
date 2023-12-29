@@ -58,7 +58,9 @@
 #include <commandline/program_options_extended.h>
 #include <commandline/option_arguments.h>
 
+#ifndef HEADLESS_ONLY
 #include "default_vdriver.h"
+#endif
 #include "headless.h"
 
 #if defined(__linux__) && defined(PERSONALITY_HACK)
@@ -203,7 +205,11 @@ static std::vector<std::string> parseCommandLine(int& argc, char **argv)
 
     po::options_description testing("Automated Testing");
     testing.add_options()
+#ifdef HEADLESS_ONLY
+        ("headless", po::bool_switch(&flag_headless), "disable all graphics output (always on in this build)")
+#else
         ("headless", po::bool_switch(&flag_headless), "disable all graphics output")
+#endif
         ("record", po::value(&flag_record), "record events to file")
         ("playback", po::value(&flag_playback), "play back events from file")
         ("timewarp", pox::value<Ratio>()
@@ -401,11 +407,15 @@ int main(int argc, char **argv)
 
     updateArgcArgv(argc, argv, remainingArgs);
 
+#ifdef HEADLESS_ONLY
+    vdriver = std::make_unique<HeadlessVideoDriver>(EventSink::instance.get());
+#else
     if(flag_headless)
         vdriver = std::make_unique<HeadlessVideoDriver>(EventSink::instance.get());
     else
         vdriver = std::make_unique<DefaultVDriver>(EventSink::instance.get(), argc, argv);
-    
+#endif
+
     remainingArgs = std::vector<std::string>(argv + 1, argv + argc);
     
     checkBadArgs(remainingArgs);

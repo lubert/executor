@@ -30,6 +30,18 @@
             hardeningDisable = [ "all" ];
             cmakeFlags = [ "-DRUN_FIXUP_BUNDLE=NO" "-DNO_STATIC_BOOST=YES" ];
           };
+        packages.headless = pkgs.stdenv.mkDerivation
+          {
+            name = "executor2000";
+            nativeBuildInputs = with pkgs; [ cmake bison perl ruby pkg-config ];
+            buildInputs = with pkgs; [
+              boost
+              readline
+            ];
+            src = ./.;
+            cmakeFlags = ["-DFRONT_ENDS=headless"];
+            hardeningDisable = [ "all" ];
+          };
       };
     };
 }
