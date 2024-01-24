@@ -37,9 +37,12 @@
             buildInputs = with pkgs; [
               boost
               readline
-            ];
+            ] ++ lib.optionals stdenv.isDarwin (with darwin.apple_sdk.frameworks; [
+              Carbon
+              Cocoa
+            ]);
             src = ./.;
-            cmakeFlags = ["-DFRONT_ENDS=headless"];
+            cmakeFlags = ["-DFRONT_ENDS=headless" "-DNO_STATIC_BOOST=YES"];
             hardeningDisable = [ "all" ];
           };
       };
