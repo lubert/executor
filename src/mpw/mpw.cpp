@@ -143,7 +143,11 @@ static int C_mpwRead(MPWFile* file)
     printf("mpwRead(cookie=%d, %d)\n", (int) file->cookie, (int) file->count);
     fflush(stdout);
 
+#ifdef WIN32
+    long long size = 0;
+#else
     ssize_t size = 0;
+#endif
 
     if(auto *e = getEntry(file->cookie))
     {
@@ -180,8 +184,11 @@ static int C_mpwWrite(MPWFile* file)
     //fflush(stdout);
 
     //printf("writing %d bytes from %p\n", (int) file->count, (void*) file->buffer);
-
+#ifdef WIN32
+    long long size = 0;
+#else
     ssize_t size = 0;
+#endif
 
     if(auto *e = getEntry(file->cookie))
     {
